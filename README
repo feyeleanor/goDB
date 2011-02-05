@@ -1,0 +1,1 @@
+goDB is a database access library for Go. It is not modelled after any existing database library and is intended to feel idiomatic regardless of the backend database.
