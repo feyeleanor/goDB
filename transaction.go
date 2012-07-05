@@ -1,27 +1,25 @@
 package goDB
 
-import "os"
-
 type TransactionalDatabase interface {
-	Begin() os.Error
-	Rollback() os.Error
-	Commit() os.Error
+	Begin() error
+	Rollback() error
+	Commit() error
 }
 
 type MarkableDatabase interface {
-	Mark(id interface{}) os.Error
-	MergeSteps(id interface{}) os.Error
-	Release(id interface{}) os.Error
+	Mark(id interface{}) error
+	MergeSteps(id interface{}) error
+	Release(id interface{}) error
 }
 
 type Transaction []func(db TransactionalDatabase)
 
-func (t Transaction) Execute(db TransactionalDatabase) (e os.Error) {
+func (t Transaction) Execute(db TransactionalDatabase) (e error) {
 	defer func() {
 		switch r := recover().(type) {
 		case nil:
 			e = db.Commit()
-		case os.Error:
+		case error:
 			if db.Rollback() != nil {
 				panic(e)
 			} else {
@@ -40,11 +38,11 @@ func (t Transaction) Execute(db TransactionalDatabase) (e os.Error) {
 	return
 }
 
-func (t Transaction) Step(db MarkableDatabase, id interface{}) (e os.Error) {
+func (t Transaction) Step(db MarkableDatabase, id interface{}) (e error) {
 	defer func() {
 		switch r := recover().(type) {
 		case nil:
-		case os.Error:
+		case error:
 			if db.Release(id) != nil {
 				panic(e)
 			} else {
